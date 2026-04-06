@@ -1,6 +1,27 @@
 # PawPal+ (Module 2 Project)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+A Streamlit app that helps a pet owner plan and schedule daily care tasks for their pet.
+
+![PawPal+ App Screenshot](screenshots/app_screenshot.png)
+
+---
+
+## Features
+
+| Feature | Description |
+|---|---|
+| **Owner & Pet Registration** | Register an owner with a pet name and species; multiple owners supported in one session. |
+| **Task Management** | Add tasks with title, duration, priority (high / medium / low), optional start time, and recurrence frequency. |
+| **Chronological Sorting** | View tasks sorted by start time (`get_schedule_by_time()`); tasks with no time set appear last. |
+| **Priority Sorting** | Sort by priority (high → medium → low) with alphabetical title tie-breaking. |
+| **Status Filtering** | Toggle between Pending, Completed, and All task views. |
+| **Conflict Detection** | Persistent `st.warning` banners flag any double-booked time slots, naming the specific tasks and offering a resolution hint. |
+| **Recurring Tasks** | Completing a daily or weekly task automatically schedules the next occurrence; one-off tasks are not rescheduled. |
+| **Daily Plan Generator** | Greedy planner selects the highest-priority tasks that fit within your available time budget. |
+| **Plan Display** | Each planned task renders as a bordered card showing priority badge, time, and duration. |
+| **UML Class Diagram** | See `uml_final.png` for the full class diagram (Owner, Pet, Task, Schedule). |
+
+---
 
 ## Scenario
 
