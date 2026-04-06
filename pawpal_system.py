@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
@@ -64,18 +65,45 @@ class Schedule:
         if task not in task.pet.tasks:
             task.pet.tasks.append(task)
 
-    def get_schedule(self) -> list[Task]:
-        """Return all incomplete tasks sorted by priority then title."""
-        pending = [t for t in self.tasks if not t.completed]
-        return sorted(pending, key=lambda t: (PRIORITY_ORDER.get(t.priority, 99), t.title))
+    def get_schedule(self, status: str = "pending") -> list[Task]:
+        """Return tasks sorted by priority then title.
 
-    def get_tasks_for_pet(self, pet: Pet) -> list[Task]:
-        """Return incomplete tasks for a specific pet, sorted by priority."""
-        return [t for t in self.get_schedule() if t.pet is pet]
+        status: "pending" (default) — incomplete only
+                "completed"          — completed only
+                "all"                — every task
+        """
+        if status == "completed":
+            tasks = [t for t in self.tasks if t.completed]
+        elif status == "all":
+            tasks = self.tasks[:]
+        else:
+            tasks = [t for t in self.tasks if not t.completed]
+        return sorted(tasks, key=lambda t: (PRIORITY_ORDER.get(t.priority, 99), t.title))
 
-    def get_tasks_by_priority(self, priority: str) -> list[Task]:
-        """Return all incomplete tasks matching the given priority level."""
-        return [t for t in self.get_schedule() if t.priority == priority]
+    def get_schedule_by_time(self, status: str = "pending") -> list[Task]:
+        """Return tasks sorted by scheduled time (HH:MM). Tasks with no time set appear last."""
+        tasks = self.get_schedule(status=status)
+        return sorted(tasks, key=lambda t: t.time if t.time else "99:99")
+
+    def get_conflicts(self) -> dict[str, list[Task]]:
+        """Return a dict of time slots that have more than one task scheduled.
+
+        Keys are time strings (e.g. "08:00"); values are the conflicting Task lists.
+        Only tasks with a non-empty time value are considered.
+        """
+        time_map: dict[str, list[Task]] = defaultdict(list)
+        for t in self.tasks:
+            if t.time:
+                time_map[t.time].append(t)
+        return {time: tasks for time, tasks in time_map.items() if len(tasks) > 1}
+
+    def get_tasks_for_pet(self, pet: Pet, status: str = "pending") -> list[Task]:
+        """Return tasks for a specific pet, sorted by priority."""
+        return [t for t in self.get_schedule(status=status) if t.pet is pet]
+
+    def get_tasks_by_priority(self, priority: str, status: str = "pending") -> list[Task]:
+        """Return tasks matching the given priority level."""
+        return [t for t in self.get_schedule(status=status) if t.priority == priority]
 
     def complete_task(self, task: Task) -> None:
         """Mark a task as completed."""
