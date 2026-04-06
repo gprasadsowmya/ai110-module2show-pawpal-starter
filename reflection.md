@@ -3,14 +3,31 @@
 ## 1. System Design
 
 **a. Initial design**
+Three core actions that the user should be able to perform:
+1. Add a pet care task. ex: medicine to be fed at between 8 AM to 10 AM .
+2. Add constraints. ex: need to head to work at 9AM.
+3. User adds a pet. ex: support for more than one pet, cat dog etc.
+4. User is able to see all tasks for the day.
+
 
 - Briefly describe your initial UML design.
+
+Four classes: Owner has a collection of Pets (composition pets don't exist without an owner). Task holds a duration, priority, title, and a reference to the Pet it's assigned to. Schedule ties everything together, it belongs to one Owner and holds a list of Tasks, with methods to add tasks and retrieve the full schedule.
+
+
+
 - What classes did you include, and what responsibilities did you assign to each?
+
+Basically: an owner has pets, tasks are assigned to individual pets, and a schedule aggregates those tasks under an owner.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+Yes, claude chat identified some bottlenecks and I kept the following:
+
+Added a back-reference from Pet to Owner (defaulting to None) that gets set automatically when add_pet is called, keeping the link in sync without extra manual wiring. Moved Schedule creation into Owner.__init__ so the two are always paired — callers access it via owner.schedule instead of instantiating it separately. Added a guard in Schedule.add_task that raises a ValueError if the task's pet isn't in the owner's pet list, preventing orphaned tasks from being silently added to the wrong schedule.
 
 ---
 
