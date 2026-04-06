@@ -22,13 +22,25 @@ owner.schedule.add_task(Task(
     frequency="daily",
 ))
 
+# Conflict 1: two tasks for the same pet at the same time
+owner.schedule.add_task(Task(
+    title="Vet check-in call",
+    duration=10,
+    priority="high",
+    pet=mochi,
+    description="Monthly phone check-in with the vet",
+    time="09:00",       # same time as Brush coat (added later) — same pet conflict
+    frequency="monthly",
+))
+
+# Conflict 2: two tasks for different pets at the same time
 owner.schedule.add_task(Task(
     title="Flea treatment",
     duration=5,
     priority="low",
     pet=biscuit,
     description="Apply monthly topical treatment",
-    time="08:00",       # conflicts with Morning walk intentionally
+    time="08:00",       # same time as Morning walk (added later) — different pet conflict
     frequency="monthly",
 ))
 
@@ -48,7 +60,7 @@ owner.schedule.add_task(Task(
     priority="high",
     pet=biscuit,
     description="At least 2 blocks, off-leash at the park if possible",
-    time="08:00",       # same time as Flea treatment — deliberate conflict
+    time="08:00",       # triggers warning — conflicts with Flea treatment above
     frequency="daily",
 ))
 
@@ -112,13 +124,11 @@ for t in owner.schedule.get_schedule(status="all"):
 # ── 3. CONFLICT DETECTION ──────────────────────────────────────────────────────
 print()
 print("=" * 55)
-print("3. CONFLICT DETECTION")
+print("3. CONFLICT DETECTION (warn_conflicts)")
 print("=" * 55)
-conflicts = owner.schedule.get_conflicts()
-if conflicts:
-    for time_slot, tasks in conflicts.items():
-        print(f"  CONFLICT at {time_slot}:")
-        for t in tasks:
-            print(f"    - {t.title} ({t.pet.name})")
+warnings = owner.schedule.warn_conflicts()
+if warnings:
+    for w in warnings:
+        print(f"  {w}")
 else:
     print("  No conflicts found.")

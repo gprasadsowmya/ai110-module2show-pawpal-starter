@@ -40,8 +40,13 @@ Added a back-reference from Pet to Owner (defaulting to None) that gets set auto
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+**Exact start-time matching instead of duration overlap detection**
+
+The scheduler's `get_conflicts()` method flags two tasks as conflicting only when their `time` strings are identical (e.g., both set to `"08:00"`). It does not check whether the *duration* of one task overlaps with the start of another. For example, a 30-minute walk starting at `"08:00"` and a 10-minute feeding starting at `"08:20"` actually overlap in real time, but the scheduler does not catch this because their start times differ.
+
+This is a deliberate simplification. Implementing true duration-overlap detection would require converting `time` strings to `datetime` objects, adding the `duration` as a `timedelta`, and checking whether any two intervals intersect — roughly four times more code for a feature that matters most in tightly packed schedules. For a pet care app where tasks are spaced across a full day (morning feeding, midday walk, evening grooming), exact-time matching catches the most common mistake — accidentally double-booking the same slot — without the added complexity.
+
+The tradeoff is reasonable for this scenario because pet care schedules are loosely packed by nature. If the app were scheduling back-to-back appointments in a veterinary clinic, duration-overlap detection would be the right choice.
 
 ---
 
