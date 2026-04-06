@@ -39,20 +39,44 @@ At minimum, your system should:
 
 st.divider()
 
-st.subheader("Demo Inputs")
-owner_name = st.text_input("Owner name", value="Jordan")
-pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
+# --- Owner registry ---
+if "owners" not in st.session_state:
+    st.session_state.owners = {}
 
-if "owner" not in st.session_state:
-    pet = Pet(name=pet_name, species=species)
-    owner = Owner(name=owner_name)
-    owner.add_pet(pet)
-    st.session_state.owner = owner
+st.subheader("Add Owner")
+with st.form("add_owner_form"):
+    owner_name = st.text_input("Owner name", value="Jordan")
+    pet_name = st.text_input("Pet name", value="Mochi")
+    species = st.selectbox("Species", ["dog", "cat", "other"])
+    submitted = st.form_submit_button("Add owner")
 
-owner = st.session_state.owner
+if submitted:
+    if not owner_name:
+        st.warning("Owner name cannot be empty.")
+    elif owner_name in st.session_state.owners:
+        st.warning(f"'{owner_name}' already exists.")
+    else:
+        pet = Pet(name=pet_name, species=species)
+        new_owner = Owner(name=owner_name)
+        new_owner.add_pet(pet)
+        st.session_state.owners[owner_name] = new_owner
+        st.success(f"Added owner '{owner_name}' with pet '{pet_name}'.")
+
+st.divider()
+
+if not st.session_state.owners:
+    st.info("No owners yet. Add one above.")
+    st.stop()
+
+# --- Owner selector ---
+st.subheader("Select Owner")
+selected_name = st.selectbox("Owner", list(st.session_state.owners.keys()))
+owner = st.session_state.owners[selected_name]
 pet = owner.pets[0]
 
+st.caption(f"Pet: **{pet.name}** ({pet.species})")
+
+# --- Tasks ---
 st.markdown("### Tasks")
 st.caption("Add tasks to build a schedule.")
 
@@ -79,6 +103,7 @@ else:
 
 st.divider()
 
+# --- Schedule ---
 st.subheader("Build Schedule")
 available_minutes = st.number_input("Available minutes today", min_value=10, max_value=480, value=60)
 
